@@ -58,7 +58,7 @@ router.get("/playlist/:source/:destination", async (req, res) => {
         case "Deezer":
         case "deezer":
             try {
-                for (let i = 12; i < playlists.length; i++) {
+                for (let i = 0; i < playlists.length; i++) {
                     await Axios.post(
                         "http://localhost:3000/deezer/add_playlist",
                         {
