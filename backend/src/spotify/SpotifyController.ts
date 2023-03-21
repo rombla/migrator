@@ -119,7 +119,10 @@ async function getPlaylistsNames(
   try {
     const { data } = await SpotifyRouter.get("/me/playlists?limit=50");
     const items = data.items;
-    res.json({ items: items.map(({ name }: { name: string }) => name) });
+    res.json({
+      items: items.map(({ name }: { name: string }) => name),
+      size: data.total,
+    });
   } catch (err) {
     next(err);
   }

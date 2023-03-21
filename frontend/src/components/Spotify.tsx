@@ -16,23 +16,13 @@ const Spotify: React.FC = () => {
 
 const SpotifyConnected: React.FC = () => {
   const { data } = useData("http://localhost:3000/spotify/me");
-  // React.useEffect(() => {
-  //   fetch("http://localhost:3000/spotify/me")
-  //     .then((response) => {
-  //       if (response.status === 200) {
-  //         response.json().then((data) => setUserData(data));
-  //       } else {
-  //         console.error("something went wrong");
-  //       }
-  //     })
-  //     .catch(console.error);
-  // }, []);
 
   if (!data) return <div>"Loading..."</div>;
 
   return (
     <div>
       Connected to Spotify as {data?.display_name ?? ""}
+      <br />
       <Playlists />
     </div>
   );
@@ -50,7 +40,9 @@ const Playlists: React.FC = () => {
   return (
     <div style={styles.container}>
       <div style={styles.title}>Your playlists:</div>
-      <select multiple>{playlists}</select>
+      <select multiple style={styles.selector} size={data.size}>
+        {playlists}
+      </select>
     </div>
   );
 };
@@ -66,6 +58,11 @@ const styles = {
     fontFamily: "Roboto",
     fontSize: 18,
     fontWeight: "bold",
+    paddingBottom: 24,
+    paddingTop: 24,
+  },
+  selector: {
+    height: "100%",
   },
 };
 

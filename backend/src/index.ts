@@ -31,18 +31,20 @@ const deezer_redirect_uri = "http://localhost:3000/callback/deezer";
 
 interface responseParams {
   access_token: string;
-  expires: string;
+  expires: number;
 }
 
 function getParams(data: string): responseParams {
   var result = {
     access_token: "",
-    expires: "",
+    expires: 0,
   };
   data.split("&").forEach((part) => {
     var item = part.split("=");
-    if (item[0] === "access_token" || item[0] === "expires") {
+    if (item[0] === "access_token") {
       result[item[0]] = decodeURIComponent(item[1]);
+    } else if (item[0] === "expires") {
+      result.expires = parseInt(item[1]);
     }
   });
   return result;
@@ -70,9 +72,12 @@ app.get("/deezer-login", (req, res) => {
 
 app.get("/callback/deezer", (req, res) => {
   const url: string = `https://connect.deezer.com/oauth/access_token.php?app_id=${deezer_app_id}&secret=${deezer_app_secret}&code=${req.query.code}`;
+  console.log(url);
   Axios.get(url)
     .then((response) => {
+      console.log(response.data);
       const params: responseParams = getParams(response.data);
+      console.log(params);
       res.cookie("deezer_token", params.access_token, {
         httpOnly: true,
         expires: new Date(Date.now() + params.expires),
@@ -89,7 +94,7 @@ app.get("/callback/deezer", (req, res) => {
       res.redirect("http://localhost:4200");
     })
     .catch((error) => {
-      console.error(error.response.data);
+      console.error(error);
       res.status(500).send("Something went wrong.");
     });
 });
