@@ -3,7 +3,6 @@ import Axios from "axios";
 import dotenv from "dotenv";
 import cookieParser from "cookie-parser";
 import bodyParser from "body-parser";
-// import methodOverride from "method-override";
 
 import spotifyRouter from "./spotify/router";
 import deezerRouter from "./deezer/router";
@@ -12,6 +11,7 @@ import transferRouter from "./transfer/router";
 import { authCallback as spotifyCallback } from "./spotify/SpotifyController";
 
 import cors from "cors";
+import { ApiError } from "./types";
 
 dotenv.config();
 
@@ -98,12 +98,13 @@ app.use("/spotify", spotifyRouter);
 app.use("/deezer", deezerRouter);
 app.use("/transfer", transferRouter);
 
-// app.use(methodOverride());
-
-// app.use((err: Error, req: Express.Request, res: any, next: NextFunction) => {
-//   console.error(err.stack);
-//   res.status(500).send("Something broke!");
-// });
+app.use((err: Error, req: Express.Request, res: any, next: NextFunction) => {
+  if (err.message === ApiError.UNAUTHORIZED) {
+    res.status(401).json({ status: 401, message: "Unauthorized" });
+  } else {
+    next(err);
+  }
+});
 
 app.listen(port, () => {
   console.log(`Listening from port ${port}`);

@@ -3,7 +3,13 @@ import querystring from "querystring";
 import express, { NextFunction } from "express";
 import dotenv from "dotenv";
 
-import { Track, Playlist, SpotifyTrack, SpotifyTracksList } from "../types";
+import {
+  Track,
+  Playlist,
+  SpotifyTrack,
+  SpotifyTracksList,
+  ApiError,
+} from "../types";
 
 dotenv.config();
 
@@ -12,23 +18,12 @@ const SpotifyRouter = Axios.create({
 });
 SpotifyRouter.interceptors.response.use(undefined, (error: AxiosError) => {
   if (401 === error.response?.status) {
-    return Promise.reject("Unauthorized");
+    return Promise.reject(new Error(ApiError.UNAUTHORIZED));
   } else {
-    return Promise.reject();
+    return Promise.reject(error);
   }
 });
 
-// const api = {
-//   get: (url: string, res: ) => {
-//     try {
-//       SpotifyRouter.get(url)
-//     } catch (error: string | any) {
-//       if (error === "Unauthorized") {
-
-//       }
-//     }
-//   }
-// }
 const client_id = process.env.SPOTIFY_CLIENT_ID;
 const client_secret = process.env.SPOTIFY_CLIENT_SECRET;
 const scopes = "user-library-read playlist-read-private user-read-private";
@@ -118,15 +113,13 @@ function getMe(req: express.Request, res: express.Response) {
 
 async function getPlaylistsNames(
   req: Express.Request,
-  res: Express.Response,
+  res: any,
   next: NextFunction
 ) {
-  let playlists: Omit<Playlist, "items">[];
-
   try {
     const { data } = await SpotifyRouter.get("/me/playlists?limit=50");
     const items = data.items;
-    return items.map(({ name }: { name: string }) => name);
+    res.json({ items: items.map(({ name }: { name: string }) => name) });
   } catch (err) {
     next(err);
   }
